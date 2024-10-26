@@ -1,0 +1,159 @@
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
+
+public class QuizSystem {
+    private static final String USERNAME = "user123";
+    private static final String PASSWORD = "password123";
+    private static String currentPassword = PASSWORD;
+    private static String profileInfo = "Default Profile Info";
+
+    private static final Map<String, String> mcqQuestions = new HashMap<>();
+    private static final Map<String, String> mcqAnswers = new HashMap<>();
+    private static int timer = 60; // Set a 60-second timer for the quiz
+
+    public static void main(String[] args) throws InterruptedException {
+        // User Login
+        try (Scanner scanner = new Scanner(System.in)) {
+            // User Login
+            if (!login(scanner)) {
+                System.out.println("Login failed. Exiting the system.");
+                return;
+            }
+            
+            boolean quit = false;
+            
+            while (!quit) {
+                System.out.println("\nAvailable Operations:");
+                System.out.println("1. Update Profile and Password");
+                System.out.println("2. Take Quiz (MCQs)");
+                System.out.println("3. Logout");
+                System.out.print("Choose an option: ");
+                int choice = scanner.nextInt();
+                scanner.nextLine(); // Consume newline
+                
+                switch (choice) {
+                    case 1 -> updateProfile(scanner);
+                    case 2 -> takeQuiz(scanner);
+                    case 3 -> {
+                        quit = true;
+                        logout();
+                    }
+                    default -> System.out.println("Invalid option. Please try again.");
+                }
+            }
+        }
+    }
+
+    // Login Functionality
+    private static boolean login(Scanner scanner) {
+        System.out.println("Login");
+        System.out.print("Enter Username: ");
+        String username = scanner.nextLine();
+        System.out.print("Enter Password: ");
+        String password = scanner.nextLine();
+
+        if (USERNAME.equals(username) && currentPassword.equals(password)) {
+            System.out.println("Login successful.");
+            return true;
+        } else {
+            System.out.println("Invalid username or password.");
+            return false;
+        }
+    }
+
+    // Update Profile and Password Functionality
+    private static void updateProfile(Scanner scanner) {
+        System.out.println("Update Profile and Password");
+        System.out.println("1. Update Profile");
+        System.out.println("2. Change Password");
+        System.out.print("Choose an option: ");
+        int choice = scanner.nextInt();
+        scanner.nextLine(); // Consume newline
+        switch (choice) {
+            case 1 -> {
+                System.out.print("Enter new profile info: ");
+                profileInfo = scanner.nextLine();
+                System.out.println("Profile updated successfully.");
+            }
+            case 2 -> {
+                System.out.print("Enter current password: ");
+                String oldPassword = scanner.nextLine();
+                if (oldPassword.equals(currentPassword)) {
+                    System.out.print("Enter new password: ");
+                    String newPassword = scanner.nextLine();
+                    currentPassword = newPassword;
+                    System.out.println("Password updated successfully.");
+                } else {
+                    System.out.println("Incorrect current password.");
+                }
+            }
+            default -> System.out.println("Invalid option.");
+        }
+    }
+
+    // MCQ Quiz Functionality with Timer
+    private static void takeQuiz(Scanner scanner) throws InterruptedException {
+        prepareQuiz();
+        System.out.println("You have " + timer + " seconds to complete the quiz. The quiz will auto-submit when time is up.");
+
+        long startTime = System.currentTimeMillis();
+        long endTime = startTime + TimeUnit.SECONDS.toMillis(timer);
+
+        for (Map.Entry<String, String> entry : mcqQuestions.entrySet()) {
+            if (System.currentTimeMillis() > endTime) {
+                System.out.println("\nTime's up! Auto-submitting your answers...");
+                break;
+            }
+
+            System.out.println("\nQuestion: " + entry.getKey());
+            System.out.println("Options: " + entry.getValue());
+            System.out.print("Your Answer (A/B/C/D): ");
+            String answer = scanner.nextLine();
+
+            mcqAnswers.put(entry.getKey(), answer);
+        }
+
+        long timeTaken = (System.currentTimeMillis() - startTime) / 1000;
+        System.out.println("Quiz completed in " + timeTaken + " seconds.");
+        System.out.println("Auto-submitting your answers...");
+        showResults();
+    }
+
+    // Prepare the MCQ quiz questions
+    private static void prepareQuiz() {
+        mcqQuestions.put("What is the capital of France?", "A. Berlin  B. Madrid  C. Paris  D. Rome");
+        mcqQuestions.put("Which planet is known as the Red Planet?", "A. Earth  B. Mars  C. Jupiter  D. Saturn");
+        mcqQuestions.put("Who developed the theory of relativity?", "A. Isaac Newton  B. Galileo Galilei  C. Nikola Tesla  D. Albert Einstein");
+    }
+
+    // Show quiz results (for demonstration purposes)
+    private static void showResults() {
+        System.out.println("\nYour Quiz Results:");
+        for (Map.Entry<String, String> entry : mcqAnswers.entrySet()) {
+            System.out.println(entry.getKey() + " - Your Answer: " + entry.getValue());
+        }
+    }
+
+    // Logout Functionality
+    private static void logout() {
+        System.out.println("Logging out. Thank you for using the system.");
+    }
+
+    public static String getProfileInfo() {
+        return profileInfo;
+    }
+
+    public static void setProfileInfo(String profileInfo) {
+        QuizSystem.profileInfo = profileInfo;
+    }
+
+    public static int getTimer() {
+        return timer;
+    }
+
+    public static void setTimer(int timer) {
+        QuizSystem.timer = timer;
+    }
+}
